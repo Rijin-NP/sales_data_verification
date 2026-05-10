@@ -14,7 +14,7 @@ func GetSellerVerificationQuery(startDate, endDate time.Time) bson.A {
 					{Key: "created_at",
 						Value: bson.D{
 							{Key: "$gte", Value: startDate},
-							{Key: "$lte", Value: endDate},
+							{Key: "$lt", Value: endDate},
 						},
 					},
 				},

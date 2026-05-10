@@ -55,7 +55,7 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 	existingData := make(map[string][]string)
 	headers := existingRecords[0]
 	for _, row := range existingRecords[1:] {
-		key := row[0] + row[3] + row[2]
+		key := row[0] + row[2] + row[1]
 		existingData[key] = row
 	}
 
@@ -69,7 +69,7 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 			return err
 		}
 		createdAtStr := data.CreatedAt.Format("02-Jan-2006")
-		key := data.ProfileId + data.Geo + data.Email
+		key := data.ProfileId + data.Email + createdAtStr
 		var status, findings, products string
 		products = strconv.FormatInt(productCount, 10)
 		if data.LastAnalyzedAt == nil {
