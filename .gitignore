@@ -1,0 +1,14 @@
+# IDE / editor
+.vscode/
+.kilocode/
+.idea/
+
+# Go build artifacts
+*.exe
+*.test
+*.out
+/bin/
+/build/
+
+# OS
+.DS_Store
