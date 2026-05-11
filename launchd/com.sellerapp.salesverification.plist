@@ -9,6 +9,11 @@
     <array>
         <string>/usr/bin/curl</string>
         <string>-fsS</string>
+        <string>--retry</string>
+        <string>30</string>
+        <string>--retry-delay</string>
+        <string>10</string>
+        <string>--retry-connrefused</string>
         <string>--max-time</string>
         <string>900</string>
         <string>http://localhost:9070/verify_data</string>

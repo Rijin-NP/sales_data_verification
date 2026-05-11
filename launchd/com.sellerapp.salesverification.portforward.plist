@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.sellerapp.salesverification.portforward</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/kubectl</string>
+        <string>port-forward</string>
+        <string>-n</string>
+        <string>sales</string>
+        <string>svc/seller-dash-mongodb</string>
+        <string>27017:27017</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/spurge</string>
+        <key>PATH</key>
+        <string>/Users/spurge/Downloads/google-cloud-sdk/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>KUBECONFIG</key>
+        <string>/Users/spurge/.kube/config</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/sales_data_verification.portforward.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/sales_data_verification.portforward.err.log</string>
+</dict>
+</plist>

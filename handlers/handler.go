@@ -23,7 +23,7 @@ func (h *Handler) VerifyConnectedSellers(w http.ResponseWriter, r *http.Request)
 	if startStr == "" && endStr == "" {
 		now := time.Now()
 		todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		startDate = todayStart.AddDate(0, 0, -3)
+		startDate = todayStart.AddDate(0, 0, -1)
 		endDate = todayStart
 	} else {
 		startDate = common.ParseDate(startStr)
