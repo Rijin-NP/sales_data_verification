@@ -41,23 +41,11 @@ func (md MongoDBInstance) VerifySellers(startDate, endDate time.Time) error {
 }
 
 func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
-	// update csv file
-	file, err := os.Open("/Users/spurge/Downloads/verification_file.csv")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	reader := csv.NewReader(bufio.NewReader(file))
-	existingRecords, err := reader.ReadAll()
-	if err != nil {
-		return err
-	}
+	filePath := "/Users/spurge/Downloads/verification_file.csv"
 
-	existingData := make(map[string][]string)
-	headers := existingRecords[0]
-	for _, row := range existingRecords[1:] {
-		key := row[0] + row[2] + row[1]
-		existingData[key] = row
+	headers, existingData, err := readExistingCsvData(filePath)
+	if err != nil {
+		return err
 	}
 
 	for _, data := range verifiedSellers {
@@ -97,6 +85,36 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 		}
 
 	}
+
+	return writeCsvData(filePath, headers, existingData)
+}
+
+func readExistingCsvData(filePath string) ([]string, map[string][]string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer file.Close()
+	reader := csv.NewReader(bufio.NewReader(file))
+	existingRecords, err := reader.ReadAll()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	existingData := make(map[string][]string)
+	if len(existingRecords) == 0 {
+		return nil, existingData, nil
+	}
+	headers := existingRecords[0]
+	for _, row := range existingRecords[1:] {
+		key := row[0] + row[2] + row[1]
+		existingData[key] = row
+	}
+
+	return headers, existingData, nil
+}
+
+func writeCsvData(filePath string, headers []string, existingData map[string][]string) error {
 	rows := make([][]string, 0, len(existingData))
 	for _, row := range existingData {
 		rows = append(rows, row)
@@ -110,16 +128,18 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 		return di.Before(dj)
 	})
 
-	file, err = os.OpenFile("/Users/spurge/Downloads/verification_file.csv", os.O_RDWR, 0644)
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 	writer := csv.NewWriter(bufio.NewWriter(file))
 	defer writer.Flush()
-	err = writer.Write(headers)
-	if err != nil {
-		return err
+	if headers != nil {
+		err = writer.Write(headers)
+		if err != nil {
+			return err
+		}
 	}
 	for _, row := range rows {
 		err = writer.Write(row)
