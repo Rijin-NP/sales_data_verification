@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -96,6 +97,19 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 		}
 
 	}
+	rows := make([][]string, 0, len(existingData))
+	for _, row := range existingData {
+		rows = append(rows, row)
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		di, erri := time.Parse("02-Jan-2006", rows[i][1])
+		dj, errj := time.Parse("02-Jan-2006", rows[j][1])
+		if erri != nil || errj != nil {
+			return false
+		}
+		return di.Before(dj)
+	})
+
 	file, err = os.OpenFile("/Users/spurge/Downloads/verification_file.csv", os.O_RDWR, 0644)
 	if err != nil {
 		return err
@@ -107,7 +121,7 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 	if err != nil {
 		return err
 	}
-	for _, row := range existingData {
+	for _, row := range rows {
 		err = writer.Write(row)
 		if err != nil {
 			return err
