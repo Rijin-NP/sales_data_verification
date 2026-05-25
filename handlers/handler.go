@@ -30,11 +30,14 @@ func (h *Handler) VerifyConnectedSellers(w http.ResponseWriter, r *http.Request)
 		endDate = common.ParseDate(endStr).AddDate(0, 0, 1)
 	}
 
-	err := h.Service.VerifySellers(startDate, endDate)
-	if err != nil {
-		http.Error(w, "Failed to verify the  seller ingestion", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Data Verified Successfully"))
+	go func() {
+		if err := h.Service.VerifySellers(startDate, endDate); err != nil {
+			common.SendSlackMessage("Sales data verification FAILED: " + err.Error())
+			return
+		}
+		common.SendSlackMessage("Sales data verification completed. Findings written to the CSV.")
+	}()
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write([]byte("Verification started. Findings will be written to the CSV and notified on Slack."))
 }

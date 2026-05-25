@@ -32,15 +32,18 @@ func (md MongoDBInstance) VerifySellers(startDate, endDate time.Time) error {
 	defer profileCursor.Close(md.Ctx)
 	verifiedSellers := []*models.Profiles{}
 	profileCursor.All(md.Ctx, &verifiedSellers)
-	err = md.UpdateCsv(verifiedSellers)
-	if err != nil {
-		return err
-	}
-	return err
 
+	verifier, err := NewDashboardVerifier()
+	if err != nil {
+		verifier = nil
+	} else {
+		defer verifier.Close()
+	}
+
+	return md.UpdateCsv(verifiedSellers, verifier)
 }
 
-func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
+func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles, verifier *DashboardVerifier) error {
 	filePath := "/Users/spurge/Downloads/verification_file.csv"
 
 	headers, existingData, err := readExistingCsvData(filePath)
@@ -66,14 +69,18 @@ func (md MongoDBInstance) UpdateCsv(verifiedSellers []*models.Profiles) error {
 		} else {
 			status = "Synced"
 		}
+		if verifier != nil {
+			findings, _ = verifier.GetFindings(data.AccountId)
+		}
 		if existingRow, found := existingData[key]; found {
-			existingRow[4] = status
-			existingRow[5] = findings
-			existingRow[6] = products
+			existingRow[5] = status
+			existingRow[6] = findings
+			existingRow[7] = products
 			existingData[key] = existingRow
 		} else {
 			existingData[key] = []string{
 				data.ProfileId,
+				data.AccountId,
 				createdAtStr,
 				data.Email,
 				data.Geo,
@@ -107,7 +114,7 @@ func readExistingCsvData(filePath string) ([]string, map[string][]string, error)
 	}
 	headers := existingRecords[0]
 	for _, row := range existingRecords[1:] {
-		key := row[0] + row[2] + row[1]
+		key := row[0] + row[3] + row[2]
 		existingData[key] = row
 	}
 
@@ -120,15 +127,15 @@ func writeCsvData(filePath string, headers []string, existingData map[string][]s
 		rows = append(rows, row)
 	}
 	sort.Slice(rows, func(i, j int) bool {
-		di, erri := time.Parse("02-Jan-2006", rows[i][1])
-		dj, errj := time.Parse("02-Jan-2006", rows[j][1])
+		di, erri := time.Parse("02-Jan-2006", rows[i][2])
+		dj, errj := time.Parse("02-Jan-2006", rows[j][2])
 		if erri != nil || errj != nil {
 			return false
 		}
 		return di.Before(dj)
 	})
 
-	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}

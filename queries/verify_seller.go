@@ -25,6 +25,7 @@ func GetSellerVerificationQuery(startDate, endDate time.Time) bson.A {
 				Value: bson.D{
 					{Key: "_id", Value: 0},
 					{Key: "profile_id", Value: 1},
+					{Key: "account_id", Value: 1},
 					{Key: "geo", Value: 1},
 					{Key: "created_at", Value: 1},
 					{Key: "email", Value: 1},

@@ -22,6 +22,16 @@
     <key>ThrottleInterval</key>
     <integer>30</integer>
 
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>DASHBOARD_BASE_URL</key>
+        <string>https://dashboard.sellerapp.com</string>
+        <key>DASHBOARD_ADMIN_EMAIL</key>
+        <string>brij@sellerapp.com</string>
+        <key>DASHBOARD_ADMIN_PASSWORD</key>
+        <string>SellerApp@1234</string>
+    </dict>
+
     <key>StandardOutPath</key>
     <string>/tmp/sales_data_verification.service.out.log</string>
     <key>StandardErrorPath</key>
